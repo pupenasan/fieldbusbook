@@ -1,5 +1,92 @@
 # Протокол S7 TCP/IP
 
+https://support.industry.siemens.com/cs/document/26483647/what-properties-advantages-and-special-features-does-the-s7-protocol-offer-?dti=0&lc=en-WW
+
+All SIMATIC S7 CPUs and C7 CPUs have integrated S7 communication services with which the user program can read and write data.
+
+Усі процесори SIMATIC S7 і процесори C7 мають інтегровані служби зв’язку S7, за допомогою яких програма користувача може читати та записувати дані.
+
+The following functions are available to you for the S7 CPUs and C7 CPUs  regardless of the bus system used, so that you can use S7 communication  via Industrial Ethernet, PROFIBUS or MPI:
+
+- System function blocks (SFBs): in STEP 7 V5.x for S7-400 CPUs 
+- Function blocks (FBs): in STEP 7 V5.x for S7-300 CPUs and C7-CPUs
+- Instructions: in TIA Portal for S7-300 CPUs, S7-400 CPUs, S7-1200 CPUs and S7-1500 CPUs
+
+Наступні функції доступні для процесорів S7 і C7 незалежно від використовуваної системи шини, щоб ви могли використовувати зв’язок S7 через Industrial Ethernet, PROFIBUS або MPI:
+
+- Системні функціональні блоки (SFB): у STEP 7 V5.x для ЦП S7-400
+- Функціональні блоки (FB): у STEP 7 V5.x для процесорів S7-300 і C7-CPU
+- Інструкції: на TIA Portal для ЦП S7-300, ЦП S7-400, ЦП S7-1200 і ЦП S7-1500
+
+Position of the S7 protocol in the ISO-OSI reference model.
+
+Позиція протоколу S7 в еталонній моделі ISO-OSI.![img](media/NET_S7_Protokoll_01.png)
+Fig. 1 
+
+### Services of the S7 protocol
+
+Overview of the S7 protocol services.
+Огляд послуг протоколу S7. 
+
+Table 1
+
+| Service      | Description                                                  |
+| :----------- | :----------------------------------------------------------- |
+| PUT / GET    | This service is a unidirectional read/write service for transferring small volumes of data to and from a station.<br />Ця послуга є однонаправленою службою читання/запису для передачі невеликих обсягів даних на станцію та зі станції. |
+| BSEND / BRCV | This service is a bidirectional and block-oriented service for transferring large volumes of data between two stations.<br />Ця послуга є двонаправленою та блоково-орієнтованою службою для передачі великих обсягів даних між двома станціями |
+| USEND / URCV | This service is a bidirectional and uncoordinated service for transferring small volumes of data between two stations.<br />Ця послуга є двонаправленою та некоординованою послугою для передачі невеликих обсягів даних між двома станціями. |
+
+### User data size
+
+The S7 protocol permits transfer of data from 1 byte to 64 Kbytes. The  maximum data size depends on the service used and the S7 CPU used.
+Протокол S7 дозволяє передавати дані від 1 байта до 64 Кбайт. Максимальний розмір даних залежить від використовуваної служби та процесора S7.
+
+Table 2
+
+| Service      | S7-300 CPU                | S7-400 CPU  | S7-1200 CPU | S7-1500 CPU                                                  |
+| :----------- | :------------------------ | :---------- | :---------- | :----------------------------------------------------------- |
+| PUT / GET    | 160 bytes                 | 400 bytes   | 160 bytes   | 880 bytes                                                    |
+| BSEND / BRCV | 32768 bytes / 65534 bytes | 65534 bytes | -           | 65534 bytes with standard access65535 bytes with optimized access |
+| USEND / URCV | 160 bytes                 | 440 bytes   | -           | 920 bytes                                                    |
+
+### Properties of the S7 protocol
+
+У наступній таблиці показано властивості протоколу S7.
+
+Table 3
+
+| Properties                    | PUT / GET                                 | BSEND / BRCV                            | USEND / URCV                        |
+| :---------------------------- | :---------------------------------------- | :-------------------------------------- | :---------------------------------- |
+| Memory areas                  | M, D, E, A, T, Z                          | M, D, E, A, T, Z                        | M, D, E, A, T, Z                    |
+| Data consistency              | 8 to 32 bytes32 bytes to total length1)2) | Total length per job2)                  | Total length per job2)              |
+| Communication principle       | Client / Server                           | Client / Client                         | Client / Client                     |
+| Maximum number of connections | See CPU specification                     | See CPU specification                   | See CPU specification               |
+| Functions                     | FB15 / SFB15 "PUT"FB14 / SFB14 "GET"      | FB12 / SFB12 "BSEND"FB13 / SFB13 "BRCV" | FB8 / SFB8 "USEND"FB9 / SFB9 "URCV" |
+
+1) Depending on the CPU used. 
+
+2) In the user program you must make sure that the data block is not modified during data transfer.
+
+### Advantages of the S7 protocol
+
+- Independent of the bus medium (PROFIBUS, Industrial Ethernet, MPI). 
+- Can be used on all S7 data areas. 
+- Transfer of up to 64 Kbytes in one job. 
+- The S7 protocol ensures automatic acknowledgment of the data records.
+- Low processor and bus load during transfer of large volumes of data.
+
+
+
+- Незалежність від середовища передачі (PROFIBUS, Industrial Ethernet, MPI).
+- Можна використовувати для всіх областей даних S7.
+- Передача до 64 Кбайт за одне завдання.
+- Протокол S7 забезпечує автоматичне підтвердження записів даних.
+- Низьке навантаження на процесор і шину при передачі великих обсягів даних.
+
+The S7 protocol is supported by all available S7 CPUs and communication  processors. Furthermore, PC systems with appropriate hardware and  software support communication via the S7 protocol. 
+
+Протокол S7 підтримується всіма доступними ЦП і комунікаційними процесорами S7. Крім того, комп'ютерні системи з відповідним апаратним і програмним забезпеченням підтримують зв'язок через протокол S7.
+
 ##  nodeS7 в node.js
 
 https://github.com/plcpeople/nodeS7
@@ -94,3 +181,4 @@ tcp port 102
 - [RFC1006](http://www.ietf.org/rfc/rfc1006.txt) *ISO Transport Service on top of the TCP Version: 3*, based on ISO 8073
 - [RFC905](http://www.ietf.org/rfc/rfc0905.txt) *ISO Transport Protocol Specification ISO DP 8073*
 - [Siemens - Information about the properties of the S7 protocol](https://support.industry.siemens.com/cs/ww/en/view/26483647) *What properties, advantages and special features does the S7 protocol offer* - Siemens Industry Online Support
+

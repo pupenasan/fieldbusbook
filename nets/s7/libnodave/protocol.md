@@ -29,7 +29,7 @@ A data area
 | Position | meaning                    | possible values |
 | -------- | -------------------------- | --------------- |
 | 0        | a function number          |                 |
-| rest     | depends on function number |                 |
+| інші     | depends on function number |                 |
 
 ## Data:
 
