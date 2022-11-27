@@ -1,14 +1,14 @@
+[S7 TCP/IP](../README.md)
+
 # Бібліотека NodeS7
 
-<https://github.com/plcpeople/nodeS7>
+Даний розділ описує бібліотеку NodeS7, оригінальний репозиторій знаходиться за наступним посиланням:  <https://github.com/plcpeople/nodeS7>
 
-NodeS7 — це бібліотека для Node.js, яка дозволяє зв’язуватися з ПЛК S7-300/400/1200/1500 за допомогою протоколу Siemens S7 Ethernet RFC1006.
-
-Це програмне забезпечення жодним чином не пов’язане з Siemens, як і автор. S7-300, S7-400, S7-1200 і S7-1500 є товарними знаками Siemens AG.
+NodeS7 — це бібліотека для Node.js, яка дозволяє зв’язуватися з ПЛК S7-300/400/1200/1500 за допомогою протоколу Siemens S7 Ethernet RFC1006. Це програмне забезпечення жодним чином не пов’язане з Siemens, як і автор. S7-300, S7-400, S7-1200 і S7-1500 є товарними знаками Siemens AG.
 
 ## Загальний опис та клієнтський інтерфейс
 
-Даний розділ перекладено з оригінального репозиторію.
+Даний підрозділ перекладено з [оригінального репозиторію](https://github.com/plcpeople/nodeS7).
 
 ### Встановлення
 
@@ -40,7 +40,7 @@ Credit to the S7 Wireshark dissector plugin for help understanding why things we
 
 Заслуга плагіна S7 Wireshark dissector, який допоміг зрозуміти, чому щось не працює. (http://sourceforge.net/projects/s7commwireshark/)
 
-### Examples
+### Приклади
 
 ```js
 var nodes7 = require('nodes7'); // Це назва пакета, якщо репозиторій клоновано, вам може знадобитися вимагати «nodeS7» із S у верхньому регістрі
@@ -234,253 +234,192 @@ callback(err, values)
 
 Даний розділ та інші файли папки репозиторію розібрані та прокоментовані вже мною.
 
-### Підключення
-
-#### initiateConnection 
-
-`initiateConnection (cParam, callback)` - підключеється до ПЛК з адресою та параметрами:
-
-- `cParam` - параметри підключення
-- `callback` - функція, що викликається 
-
-```js
-cParam : { port: 102, 
-  host: '192.168.8.106', 
-  rack: 0,//для remoteTSAP
-  slot: 2,//для remoteTSAP     
-  localTSAP = 0x0100,//альтернативний варіант вказівки безпосередньо
-  remoteTSAP = 0x0200,//альтернативний варіант вказівки безпосередньо
-  connection_name  = cParam.host + " S" + self.slot //connectionID
-  timeout: 8000,// час очікування TCP в мс
-  doNotOptimize: true,//
-}     
-```
-
-Приклад використання:
-
-```js
-conn.initiateConnection(
-    { port: 102, host: '192.168.56.102', rack: 0, slot: 2, debug: true }, 
-    connected); // slot 2 for 300/400, slot 1 for 1200/1500, change debug to true to get more info
-```
-
-#### connectNow
-
-`connectNow (cParam)` - включена функція в initiateConnection, реалізує зєднання 
-
-#### onTCPConnect
-
-`onTCPConnect ()` - викликається при вдалому підключенні по TCP, для реалізації підключення по ISO/TCP
-
-#### packetTimeout
-
-`packetTimeout (packetType, packetSeqNum)` - функція зворотного виклику при спрацюванню таймауту пакету. Виводить діагностичні повідомлення в журнал і робить певні дії в залежності від типу пакету. 
-
-`packetType` - тип пакету:
-
-- `connect` - підключення, через дві секунди буде намагатися заново підключитися якщо зєднання скинуто
-- `PDU` - через дві секунди буде намагатися заново підключитися якщо зєднання скинуто
-- `read` - буде скидувати скидувати зєднання, якщо `isoConnectionState === 4`
-- `write`  - буде скидувати скидувати зєднання, якщо `isoConnectionState === 4`
-
-`packetSeqNum` - номер пакету, потрібен для журналювання
-
-#### connectionReset
-
-Обнуляє стан зєднання (`isoConnectionState=0`) і якщо немає ніяких запитів запускається таймер на 3.5 с після чого запускається  функція `resetNow`
-
-#### resetNow
-
-Обнуляє стан зєднання (`isoConnectionState = 0`), та закриває зєднання
-
-### Читання запис
-
-#### setTranslationCB
-
-```js
-setTranslationCB (cb)
-```
-
-Встановлює функцію зворотного виклику `cb` при перетворенні.  Приклад: 
-
-```js
-var variables = {
-      TEST1: 'MR4',          // Memory real at MD4
-      TEST2: 'M32.2',        // Bit at M32.2
-      TEST3: 'M20.0',        // Bit at M20.0
-      TEST4: 'DB1,REAL0.20', // Array of 20 values in DB1
-      TEST5: 'DB1,REAL4',    // Single real value
-      TEST6: 'DB1,REAL8',    // Another single real value
-      TEST7: 'DB1,INT12.2',  // Two integer value array
-      TEST8: 'DB1,LREAL4',   // Single 8-byte real value
-      TEST9: 'DB1,X14.0',    // Single bit in a data block
-      TEST10: 'DB1,X14.0.8'  // Array of 8 bits in a data block
-};
-conn.setTranslationCB(function(tag) { return variables[tag]; }); 
-```
-
-
-
-#### addItems
-
-```js
-addItems (arg) 
-```
-
-Добавляє в масив `addRemoveArray` елемент `arg`, приклад
-
-```js
-conn.addItems(['TEST1', 'TEST4']);
-```
-
-#### writeItems
-
-Формує масив `instantWriteBlockList` з елементів типу `S7Item` що записуються та їх значень плся чого викликає `prepareWritePacket` для ...  та `sendWritePacket` для.
-
-```js
-writeItems (arg, value, cb)
-```
-
-`arg` - назва змінної, або масив назв для запису 
-
-`value` - значення для запису, або масив значень для запису
-
-`cb` - функція зворотного виклику для виклику пілся запису
-
-```js
-conn.writeItems('TEST3', true, valuesWritten);
-conn.writeItems(['TEST5', 'TEST6'], [ 867.5309, 9 ], valuesWritten); 
-conn.writeItems('TEST7', [666, 777], valuesWritten); 
-```
-
-#### prepareWritePacket
-
-
-
-#### stringToS7Addr
-
-Повертає обєкт `S7Item` за текстовим представленням
-
-```js
-stringToS7Addr (addr, useraddr, cParam)
-```
-
-`addr` - адреса в форматі S7
-
-`useraddr` - користувацька назва змінної
-
-- `'_COMMERR'` - ця змінна повертає значення true, коли виникає помилка зв’язку
-
-`cParam` - потрібно для визначення представлення даних `cParam.wdtAsUTC`
-
-```js
-stringToS7Addr('MR4', `TEST1`, self.connectionParams)
-```
-
-Приклади `useraddr:addr` :
-
-```js
-var variables = {
-      TEST1: 'MR4',          // Memory real at MD4
-      TEST2: 'M32.2',        // Bit at M32.2
-      TEST3: 'M20.0',        // Bit at M20.0
-      TEST4: 'DB1,REAL0.20', // Array of 20 values in DB1
-      TEST5: 'DB1,REAL4',    // Single real value
-      TEST6: 'DB1,REAL8',    // Another single real value
-      TEST7: 'DB1,INT12.2',  // Two integer value array
-      TEST8: 'DB1,LREAL4',   // Single 8-byte real value
-      TEST9: 'DB1,X14.0',    // Single bit in a data block
-      TEST10: 'DB1,X14.0.8'  // Array of 8 bits in a data block
-};
-```
-
-
-
-#### isWriting
-
-
-
-#### itemListSorter
-
-Сортує елементи масиву з S7Item по пріоритетності:
-
-- areaS7Code
-- addrtype
-- offset
-- bitOffset
-- byteLength
-
-Потрібне для формування 
-
-```js
-itemListSorter (a, b)
-```
-
-
+- [bufferizeS7Item](bufferizeS7Item.md)
+- [checkRFCData](checkRFCData.md)
+- [doneSending](doneSending.md)
+- [fromBCD](fromBCD.md)
+- [getWriteBuffer](getWriteBuffer.md)
+- [isQualityOK](isQualityOK.md)
+- [itemListSorter](itemListSorter.md) - Сортує елементи масиву з S7Item по пріоритетності
+- [outputLog(txt, debugLevel, id)](outputLog.md) - Виводить в консоль повідомлення `txt` з вказаним `id` та рівнем критичності `debugLevel`
+- [processS7Packet](processS7Packet.md)
+- [processS7ReadItem](processS7ReadItem.md)
+- [processS7WriteItem](processS7WriteItem.md)
+- [prototype.addItems (arg)](prtp.addItems.md) - 
+- [prototype.addItemsNow](prtp.addItemsNow.md)
+- [prototype.clearReadPacketTimeouts](prtp.clearReadPacketTimeouts.md)
+- [prototype.clearWritePacketTimeouts](prtp.clearWritePacketTimeouts.md)
+- [prototype.connectError](prtp.connectError.md)
+- [prototype.connectionCleanup](prtp.connectionCleanup.md)
+- [prototype.connectionReset](prtp.connectionReset.md) - Обнуляє стан зєднання (`isoConnectionState=0`) і якщо немає ніяких запитів запускається таймер на 3.5 с після чого запускається  функція `resetNow`
+- [prototype.connectNow (cParam)](prtp.connectNow.md) - функція викликається в initiateConnection, реалізує з'єднання 
+- [prototype.dropConnection](prtp.dropConnection.md)
+- [prototype.findItem](prtp.findItem.md)
+- [prototype.findReadIndexOfSeqNum](prtp.findReadIndexOfSeqNum.md)
+- [prototype.findWriteIndexOfSeqNum](prtp.findWriteIndexOfSeqNum.md)
+- [prototype.getNextSeqNum](prtp.getNextSeqNum.md)
+- [prototype.initiateConnection (cParam, callback)](prtp.initiateConnection.md) - підключеється до ПЛК з адресою та параметрами 
+- [prototype.isOptimizableArea](prtp.isOptimizableArea.md)
+- [prototype.isReading()](prtp.isReading.md) - Показує чи бібліотека в процесі читання даних
+- [prototype.isWaiting()](prtp.isWaiting.md) - показує чи бібліотека зайнята читанням чи записом
+- [prototype.isWriting()](prtp.isWriting.md) - Показує чи бібліотека в процесі запису даних
+- [prototype.onClientClose](prtp.onClientClose.md)
+- [prototype.onClientDisconnect](prtp.onClientDisconnect.md)
+- [prototype.onISOConnectReply](prtp.onISOConnectReply.md)
+- [prototype.onPDUReply](prtp.onPDUReply.md)
+- [prototype.onResponse](prtp.onResponse.md)
+- [prototype.onTCPConnect ()](prtp.onTCPConnect.md) - Викликається при вдалому підключенні по TCP, для реалізації підключення по ISO/TCP
+- [prototype.packetTimeout (packetType, packetSeqNum)](prtp.packetTimeout.md) - функція зворотного виклику при спрацюванню таймауту пакету. Виводить діагностичні повідомлення в журнал і робить певні дії в залежності від типу пакету. 
+- [prototype.prepareReadPacket](prtp.prepareReadPacket.md)
+- [prototype.prepareWritePacket](prtp.prepareWritePacket.md)
+- [prototype.readAllItems](prtp.readAllItems.md)
+- [prototype.readResponse](prtp.readResponse.md)
+- [prototype.readWriteError](prtp.readWriteError.md)
+- [prototype.removeItems](prtp.removeItems.md)
+- [prototype.removeItemsNow](prtp.removeItemsNow.md)
+- [prototype.resetNow](prtp.resetNow.md) - Обнуляє стан зєднання (`isoConnectionState = 0`), та закриває зєднання
+- [prototype.sendReadPacket](prtp.sendReadPacket.md)
+- [prototype.sendWritePacket](prtp.sendWritePacket.md)
+- [prototype.setTranslationCB (cb)](prtp.setTranslationCB.md) - Встановлює функцію зворотного виклику `cb` при перетворенні.
+- [prototype.writeItems (arg, value, cb)](prtp.writeItems.md) - Формує масив `instantWriteBlockList` з елементів типу `S7Item` що записуються та їх значень плся чого викликає `prepareWritePacket` для ...  та `sendWritePacket` для.
+- [prototype.writeResponse](prtp.writeResponse.md)
+- [readDT](readDT.md)
+- [readDTL](readDTL.md)
+- [S7AddrToBuffer](S7AddrToBuffer.md)
+- [S7Item](S7Item.md)
+- [S7Packet](S7Packet.md)
+- [stringToS7Addr (addr, useraddr, cParam)](stringToS7Addr.md) - Повертає обєкт `S7Item` за текстовим представленням
+- [toBCD](toBCD.md)
+- [writeDT](writeDT.md)
+- [writeDTL](writeDTL.md)
+- [writePostProcess](writePostProcess.md)
 
 ## Властивості
 
-### isoclient
+- addRemoveArray - Масив дій з елементами
 
-клієнтський сокет
+  ```json
+  {arg: arg, 
+  action: 'add' //дії add, remove,
+  }
+  ```
 
-### isoConnectionState
+- connectCallback
 
-- 0 = no connection
-- 1 = trying to connect
-- 2 = TCP connected, wait for ISO connection confirmation
-- 3 = ISO-ON-TCP connected, Wait for PDU response
-- 4 = Received PDU response
+- connectCBIssued
 
-### addRemoveArray
+- connectionID
 
-Масив дій з елементами
+- connectionParams
 
-```json
-{arg: arg, 
-action: 'add' //дії add, remove,
-}
-```
+- connectReq - буфер запиту на підключення по ISO/TCP
 
-### readPacketArray[]
+- connectTimeout - таймер, який виконує функцію при таймауту пакету
 
-`seqNum`
+- doNotOptimize
 
-`sent`
+- dropConnectionCallback
 
-`rcvd`
+- dropConnectionTimer
 
-`timeoutError`
+- effectiveDebugLevel = opts.debug ? 99 : 0
 
-`itemList` 
+- globalReadBlockList - глобальний список зчитуваних елементів що містять елементи S7Item
 
-### readReq
+- globalTimeout - 
 
-Bufferr(1500) для відправлення запиту 
+- globalWriteBlockList - глобальний список записуваних елементів що містять елементи S7Item
 
-### polledReadBlockList
+- instantWriteBlockList - Список `S7Item` для запису.
 
-Масив елментів для читання
+- isoclient - клієнтський сокет 
 
-### writeInQueue
+- isoConnectionState - 
 
-### writeDoneCallback
+  - 0 = no connection
 
-Функція зворотного виклику для читання або запису
+  - 1 = trying to connect
 
-### instantWriteBlockList
+  - 2 = TCP connected, wait for ISO connection confirmation
 
-Список `S7Item` для запису.
+  - 3 = ISO-ON-TCP connected, Wait for PDU response
 
-### translationCB
+  - 4 = Received PDU response, good to go
 
-Фугкція зворотного виклику перетворення символьних імен в адреси. Див також `setTranslationCB`
+- localTSAP
+
+- masterSequenceNumber
+
+- maxGap
+
+- maxParallel
+
+- maxPDU - параметри для переговорів при підключенні
+
+- negotiatePDU - буфер з даних запиту, що відправляються після відповіді-підтвердження на з'єднання, переговори по S7 
+
+- opts - опції
+
+- parallelJobsNow
+
+- PDUTimeout - 
+
+- polledReadBlockList - Масив елментів для читання
+
+- rack
+
+- readDoneCallback
+
+- readPacketArray - масив пакетів на читання
+
+  - `seqNum` - номер пакету
+
+  - `sent` - TRUE - пакет відправлено
+
+  - `rcvd` - TRUE - відповідь на пакет отримано
+  
+  - `itemList` - масив `S7Item`
+  
+  
+    - `timeoutError`
+  
+
+
+- readPacketValid
+- readReq - Bufferr(1500) для відправлення запиту 
+- readReqHeader
+- remoteTSAP
+- requestMaxParallel - параметри для переговорів при підключенні
+- requestMaxPDU - параметри для переговорів при підключенні
+- rereadTimer
+- resetPending
+- resetTimeout - Timed reset has happened (connectionReset)
+- silentMode = opts.silent || false
+- slot
+- translationCB - Функція зворотного виклику перетворення символьних імен в адреси. Див також `setTranslationCB`
+- writeDoneCallback - Функція зворотного виклику для читання або запису
+- writeInQueue
+- writePacketArray  - масив пакетів на запис
+
+
+  - `seqNum` - номер пакету
+  - `sent` - TRUE - пакет відправлено
+
+  - `rcvd` - TRUE - відповідь на пакет отримано
+
+  - `itemList` - масив `S7Item`
+
+
+    - `timeoutError`
+
+- writeReq
+- writeReqHeader
 
 ## Класи 
 
 ### S7Item
 
-Властивості:
+**Властивості**:
 
 `addr` - адреса в форматі S7, наприклад `DB1,X14.0`
 
@@ -554,11 +493,14 @@ Bufferr(1500) для відправлення запиту
 
 - `0x03` - для datatype === 'X'
 
-`byteBuffer`
+`byteBuffer` - сирі прочитані дані 
 
 `writeBuffer`
 
-`qualityBuffer`
+`qualityBuffer` - буфер з заповненими значеннями якосіт для даних:
+
+- `0xFF` - BAD
+- `0xC0` - Good
 
 `writeQualityBuffer` 
 
@@ -566,9 +508,9 @@ Bufferr(1500) для відправлення запиту
 
 `writeValue`
 
-`valid` 
+`valid` - прийшли валідні дані 
 
-`errCode` 
+`errCode`  - код помилки в текстовому вигляді
 
 `part`
 
@@ -580,11 +522,155 @@ Bufferr(1500) для відправлення запиту
 
 `itemReference` 
 
-Методи:
+
+
+**Методи**:
 
 `clone` - клонування об'єкту 
 
 `badValue` - повертає значення по дефолту в залежності від типу обєкту datatype
+
+## Принципи роботи
+
+### Ініціювання підключення
+
+З точки зору користувача:
+
+- спочатку створюється об'єкт типу `nodes7`, наприклад `conn`
+- викликається метод `initiateConnection` з передачею параметрів підключення та функцією зворотного виклику наприклад `connected`
+- у функції зворотного виклику прописується усі операції, які робляться після підключення
+
+```js
+var nodes7 = require('nodes7'); // Це назва пакета, якщо репозиторій клоновано, вам може знадобитися вимагати «nodeS7» із S у верхньому регістрі
+var conn = new nodes7;
+// slot 2 for 300/400, slot 1 for 1200/1500, change debug to true to get more info
+conn.initiateConnection({ port: 102, 
+                         host: '192.168.56.102', 
+                         rack: 0, slot: 2, 
+                         debug: true }, connected); 
+
+function connected(err) {
+  if (typeof(err) !== "undefined") {
+    // У нас сталася помилка. Можливо, ПЛК недоступний.
+    console.log(err);
+    process.exit();
+  }
+  // Далі використання conn для читання та запису
+  conn.setTranslationCB(function(tag) { return variables[tag]; }); 
+  conn.addItems(['TEST1', 'TEST4']);
+  conn.writeItems('TEST3', true, valuesWritten); 
+  conn.readAllItems(valuesReady);
+  //...  
+}
+```
+
+Функція [initiateConnection](prtp.initiateConnection.md) :
+
+- заповняє властивості підключення за замовченням, якщо вони не вказані
+- викликає функцію [connectNow](prtp.connectNow.md), яка реалізує саме з'єднання:
+  - викликає [connectionCleanup](prtp.connectionCleanup.md) для очистки попереднє з'єднання сокету `isoclient`
+  - створює новий сокет `isoclient = net.connect(cParam);`
+  - як функцію зворотного виклику при створенні TCP підключення вказує [onTCPConnect](prtp.onTCPConnect.md), який реалізовує підключення по ISO/TCP, а саме:
+    - `isoConnectionState = 2` -  TCP підключено, чекаємо підключення ISO
+    - ставиться обробник помилки таймауту [packetTimeout](prtp.packetTimeout.md)
+    - `connBuf = self.connectReq.slice();` - де `connectReq` - масив з байтів запиту на підключення 
+    - записує в `connBuf` `localTSAP`, `remoteTSAP`
+    - Запускає метод `write` сокету `isoclient`
+    - прослушка на подію 'data' - [onISOConnectReply](prtp.onISOConnectReply.md), яка викликається при отриманні даних, вона:
+      - `isoConnectionState = 3` - ISO-ON-TCP connected, Wait for PDU response
+      - якщо неочікувані довжини отрманих даних, то [connectionReset](prtp.connectionReset.md) - обнуляє стан з'єднання
+      - Записує в `negotiatePDU`  (буфер запиту переговорів по S7) 
+      - Відправляє пакет `isoclient.write`
+      - прослушка на подію 'data' - [onPDUReply](prtp.onPDUReply.md), в якій приходить відповідь з переговорів:
+        - отримує оброблені дані з  [checkRFCData](checkRFCData.md) `data=checkRFCData(theData);`
+        - якщо `data==="fastACK"` (старі ПЛК), повторно очікуємо прослушки, щоб доотримати порцію даних, що залишилася
+        - якщо пакет норм, то за результатами відповіді береться `maxParallel` та `maxPDU`, `self.isoConnectionState = 4` -  4 = Received PDU response, good to go; включається прослушка на подію 'data': [onResponse](prtp.onResponse.md) (див нижче опис)
+      - прослушка на подію 'error' - [readWriteError](prtp.readWriteError.md)
+    - прослушка на подію 'end' - [onClientDisconnect](prtp.onClientDisconnect.md)
+    - прослушка на подію 'close' - [onClientClose](prtp.onClientClose.md)
+  - як функцію зворотного виклику при помилці TCP  підключення вказує [connectError](prtp.connectError.md), яка викличе функцію зворотного виклику, наприклад `connected` з передачею відповідної помилки 
+
+
+
+### Читання 
+
+ToDo
+
+### Запис 
+
+Запис відбувається викликом [writeItems](prtp.writeItems.md). 
+
+```js
+writeItems (arg, value, cb)
+```
+
+`arg` - назва змінної, або масив назв для запису 
+
+`value` - значення для запису, або масив значень для запису
+
+`cb` - функція зворотного виклику для виклику після запису
+
+ToDo
+
+```js
+var nodes7 = require('nodes7'); 
+var conn = new nodes7;
+var doneWriting = false;
+
+var variables = {
+      TEST3: 'M20.0',        // Bit at M20.0
+};
+conn.initiateConnection({ port: 102, 
+                         host: '192.168.56.102', 
+                         rack: 0, slot: 2, 
+                         debug: true }, connected); 
+
+function connected(err) {
+  if (typeof(err) !== "undefined") {
+    // У нас сталася помилка. Можливо, ПЛК недоступний.
+    console.log(err);
+    process.exit();
+  }
+  // Це встановлює "переклад", щоб ми могли працювати з назвами об’єктів
+  conn.setTranslationCB(function(tag) { return variables[tag]; }); 
+  conn.writeItems('TEST3', true, valuesWritten); 
+}
+
+function valuesWritten(anythingBad) {
+  if (anythingBad) { console.log("SOMETHING WENT WRONG WRITING VALUES!!!!"); }
+  console.log("Done writing.");
+  doneWriting = true;
+  if (doneReading) { process.exit(); }
+}
+```
+
+
+
+### Прослушка на отримання даних
+
+Після підключення ставиться прослушка на подію 'data':  [onResponse](prtp.onResponse.md), яка обробляє отримані вхідні дані:
+
+- якщо довжина маленька - скидує з'єднання [connectionReset](prtp.connectionReset.md) 
+- перевіряє `data=checkRFCData(theData);`, (старі ПЛК), повторно очікуємо прослушки, щоб доотримати порцію даних, що залишилася
+- перевіряє, якщо довжина не співпадає - скидує з'єднання [connectionReset](prtp.connectionReset.md) 
+- перевіряє, якщо довжина велика - фрагментує
+- шукає номер пакету в [findReadIndexOfSeqNum](prtp.findReadIndexOfSeqNum.md), якщо знаходить то  `isReadResponse = true;`, виклик [readResponse (data, foundSeqNum)](prtp.readResponse.md):
+  - якщо пакет не відправлявся `!sent` або обробка вже відбувалася`rcvd==TRUE` тоді повернути `null`
+  - переобор по `itemList` для кожного з яких вилкикати [processS7Packet(data, itemList[itemCount], dataPointer, connectionID)](processS7Packet.md), який:
+    - перевіряє на валідність шматок
+    - виставляє якість у `qualityBuffer` та `valid`
+    - записує отримані дані в `byteBuffer` та кількість отриманих байт в `byteLength`
+    - збільшує thePointer на `byteLength` з урахуванням вирівнювання 
+  - якщо кожен елемент масиву з пакету оброблено `readPacketArray.every(doneSending)`([doneSending](doneSending.md)) тоді 
+    - проходить по елементам `globalReadBlockList` і для кожного елементу
+      - обробляє усі requestReference і ...
+      - обробляє усі itemReference для яких
+        - обробляє [processS7ReadItem](processS7ReadItem.md)
+      - для всіх у кого quality=good 
+  - інакше `sendReadPacket()`
+- шукає номер пакету в [findWriteIndexOfSeqNum](prtp.findWriteIndexOfSeqNum.md), якщо знаходить то  `isWriteResponse = true;`виклик [writeResponse (data, foundSeqNum)](prtp.writeResponse.md), який:
+  - ToDo
+
 
 ## Загальний код
 
@@ -656,30 +742,9 @@ function NodeS7(opts) {
 	self.rereadTimer = undefined;
 }
 
-NodeS7.prototype.isWaiting = function() {
-	var self = this;
-	return (self.isReading() || self.isWriting());
-}
-/**
- * Internal Functions
- */
 function doNothing(arg) {
 	return arg;
 }
-function outputLog(txt, debugLevel, id) {
-	if (silentMode) return;
-
-	var idtext;
-	if (typeof (id) === 'undefined') {
-		idtext = '';
-	} else {
-		idtext = ' ' + id;
-	}
-	if (typeof (debugLevel) === 'undefined' || effectiveDebugLevel >= debugLevel) {
-		console.log('[' + process.hrtime() + idtext + '] ' + util.format(txt));
-	}
-}
-
 ```
 
 ## Ліцензія

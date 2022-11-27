@@ -1,6 +1,8 @@
 [<-- До опису бібліотеки](README.md) 
 
-## resetNow
+# resetNow
+
+Обнуляє стан зєднання (`isoConnectionState = 0`), та закриває зєднання
 
 ```js
 NodeS7.prototype.resetNow = function() {

@@ -76,7 +76,7 @@ This is a quite experimental feature.  First you will need correctly formed prog
 
 #### Preparations
 
-The main purpose of this library is to read and write data from and to Siemens PLCs. To do so, you need to establish a connection to the PLC. First, you need to configure a serial port of your computer or establish a TCP connection. This connection is represented by the type _daveOSserialType, which contains file descriptors in case of Unix-like systems, handles in case of windows and what other systems supported in  the future might use for this purpose. use setport to initialize the members of a [_daveOSserialType](file:///C:/Users/OleksandrPupena/Downloads/libnodave-0.8.5/doc/daveOSserialType.html) to something representing a configured serial connection:
+The main purpose of this library is to read and write data from and to Siemens PLCs. To do so, you need to establish a connection to the PLC. First, you need to configure a serial port of your computer or establish a TCP connection. This connection is represented by the type _daveOSserialType, which contains file descriptors in case of Unix-like systems, handles in case of windows and what other systems supported in  the future might use for this purpose. use setport to initialize the members of a [_daveOSserialType] to something representing a configured serial connection:
 
 ```
     fds.rfd=setPort(argv[adrPos],"38400",'O');

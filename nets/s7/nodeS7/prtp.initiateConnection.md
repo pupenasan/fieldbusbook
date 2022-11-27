@@ -1,8 +1,36 @@
 [<-- До опису бібліотеки](README.md) 
 
-## initiateConnection
+# initiateConnection
 
-підключеється до ПЛК з адресою та параметрами
+## Опис
+
+`initiateConnection (cParam, callback)` - підключеється до ПЛК з адресою та параметрами:
+
+- `cParam` - параметри підключення
+- `callback` - функція, що викликається 
+
+```js
+cParam : { port: 102, 
+  host: '192.168.8.106', 
+  rack: 0,//для remoteTSAP
+  slot: 2,//для remoteTSAP     
+  localTSAP = 0x0100,//альтернативний варіант вказівки безпосередньо
+  remoteTSAP = 0x0200,//альтернативний варіант вказівки безпосередньо
+  connection_name  = cParam.host + " S" + self.slot //connectionID
+  timeout: 8000,// час очікування TCP в мс
+  doNotOptimize: true,//
+}     
+```
+
+Приклад використання:
+
+```js
+conn.initiateConnection(
+    { port: 102, host: '192.168.56.102', rack: 0, slot: 2, debug: true }, 
+    connected); // slot 2 for 300/400, slot 1 for 1200/1500, change debug to true to get more info
+```
+
+## Реалізація
 
 ```js
 NodeS7.prototype.initiateConnection = function(cParam, callback) {

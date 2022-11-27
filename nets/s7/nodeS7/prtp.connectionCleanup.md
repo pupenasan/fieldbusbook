@@ -1,6 +1,8 @@
 [<-- До опису бібліотеки](README.md) 
 
-## connectionCleanup
+# connectionCleanup
+
+Очищає попереднє з'єднання сокету
 
 ```js
 NodeS7.prototype.connectionCleanup = function() {
@@ -8,7 +10,7 @@ NodeS7.prototype.connectionCleanup = function() {
 	self.isoConnectionState = 0;
 	outputLog('Connection cleanup is happening', 0, self.connectionID);
 	if (typeof (self.isoclient) !== "undefined") {
-		// destroy the socket connection
+		// очисити з'єднання сокету
 		self.isoclient.destroy();
 		self.isoclient.removeAllListeners('data');
 		self.isoclient.removeAllListeners('error');

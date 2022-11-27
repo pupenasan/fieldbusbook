@@ -2,6 +2,25 @@
 
 ## processS7Packet
 
+Обробник отрманих даних `theDat`a для вказаного  `theItem` типу `S7Item`
+
+```js
+processS7Packet(theData, theItem, thePointer, theCID)
+```
+
+`theData` - пакет даних
+
+`theItem` - елемент
+
+`thePointer` - поточне зміщення в theData 
+
+`theCID` - connectionID
+
+- Перевіряє на коректність отриманих даних
+- виставляє якість у `qualityBuffer` та `valid`
+- записує отримані дані в `byteBuffer` та кількість отриманих байт в `byteLength`
+- збільшує thePointer на `byteLength` з урахуванням вирівнювання
+
 ```js
 function processS7Packet(theData, theItem, thePointer, theCID) {
 
@@ -9,36 +28,46 @@ function processS7Packet(theData, theItem, thePointer, theCID) {
 
 	if (typeof (theData) === "undefined") {
 		remainingLength = 0;
-		outputLog("Обробка невизначеного пакета, ймовірно, через помилку тайм-ауту", 0, theCID);
+		outputLog("Обробка невизначеного пакета, ймовірно, через помилку тайм-ауту", 
+                  0, theCID);
 	} else if (isNaN(theItem.byteLength)) {
-		// byteLength Nan should probably never reach this method.
-		// This temporal fix avoids the library crashing
-		outputLog("Processing an undefined packet, perhaps bad input?", 0, theCID);
+		// byteLength Nan, ймовірно, ніколи не досягне цього методу. 
+		// Це тимчасове виправлення дозволяє уникнути збою бібліотеки
+		outputLog("Обробка невизначеного пакета, можливо, неправильний вхід?", 
+                  0, theCID);
 		return 0;
 	} else {
-		remainingLength = theData.length - thePointer;  //Скажімо, якщо довжина дорівнює 39, а покажчик(pointer) — 35, ми можемо отримати доступ 35,36,37,38 = 4 bytes.
+        // Скажімо, якщо довжина дорівнює 39, а покажчик(pointer) — 35, 
+        // ми можемо отримати доступ 35,36,37,38 = 4 bytes.
+		remainingLength = theData.length - thePointer;  
 	}
 	var prePointer = thePointer;
 
-	// Створіть новий буфер для якості.
+	// Створює новий буфер для якості.
 	theItem.qualityBuffer = Buffer.alloc(theItem.byteLength);
-	theItem.qualityBuffer.fill(0xFF);  // Заповніть 0xFF (255), що означає NO QUALITY у світі OPC.
+    // Заповнює 0xFF (255), що означає NO QUALITY у світі OPC.
+	theItem.qualityBuffer.fill(0xFF);  
 
 	if (remainingLength < 4) {
 		theItem.valid = false;
 		if (typeof (theData) !== "undefined") {
-			theItem.errCode = 'Malformed Packet - Less Than 4 Bytes.  TDL' + theData.length + 'TP' + thePointer + 'RL' + remainingLength;
+			theItem.errCode = 'Неправильний пакет - менше 4 байтів TDL' 
+                + theData.length + 'TP' + thePointer 
+                + 'RL' + remainingLength;
 		} else {
 			theItem.errCode = "Timeout error - zero length packet";
 		}
 		outputLog(theItem.errCode, 0, theCID);
-		return 0;   			// Hard to increment the pointer so we call it a malformed packet and we're done.
+        // Важко збільшити вказівник, тому ми називаємо його 
+        // неправильно сформованим пакетом, і все готово.
+		return 0;   			 
 	}
 
 	var reportedDataLength;
 
-	if (theItem.readTransportCode == 0x04) {
-		reportedDataLength = theData.readUInt16BE(thePointer + 2) / 8;  // Для різних транспортних кодів це може бути неправильним.
+	if (theItem.readTransportCode == 0x04) {//Deault
+        // Для інших транспортних кодів це може бути неправильним.
+		reportedDataLength = theData.readUInt16BE(thePointer + 2) / 8;  
 	} else {
 		reportedDataLength = theData.readUInt16BE(thePointer + 2);
 	}
@@ -51,9 +80,13 @@ function processS7Packet(theData, theItem, thePointer, theCID) {
 
 	if (remainingLength < reportedDataLength + 2) {
 		theItem.valid = false;
-		theItem.errCode = 'Malformed Packet - Item Data Length and Packet Length Disagree.  RDL+2 ' + (reportedDataLength + 2) + ' remainingLength ' + remainingLength;
+		theItem.errCode = 'Неправильний пакет - довжина даних елемента' + 
+            ' та довжина пакета не збігаються.  RDL+2 ' 
+            + (reportedDataLength + 2) + ' remainingLength ' + remainingLength;
 		outputLog(theItem.errCode, 0 , theCID);
-		return 0;   			// Hard to increment the pointer so we call it a malformed packet and we're done.
+        // Важко збільшити вказівник, тому ми називаємо його 
+        // неправильно сформованим пакетом, і все готово.
+		return 0;   			
 	}
 
 	if (responseCode !== 0xff) {
@@ -74,34 +107,33 @@ function processS7Packet(theData, theItem, thePointer, theCID) {
 
 	if (reportedDataLength !== expectedLength) {
 		theItem.valid = false;
-		theItem.errCode = 'Invalid Response Length - Expected ' + expectedLength + ' but got ' + reportedDataLength + ' bytes.';
+		theItem.errCode = 'Invalid Response Length - Expected ' 
+            + expectedLength + ' but got ' 
+            + reportedDataLength + ' bytes.';
 		outputLog(theItem.errCode, 0 , theCID);
 		return reportedDataLength + 2;
 	}
 
 	// Looks good so far.
-	// Increment our data pointer past the status code, transport code and 2 byte length.
+	// Збільште наш покажчик даних після коду статусу, 
+    // транспортного коду та довжини 2 байтів.
 	thePointer += 4;
 
 	theItem.valid = true;
 	theItem.byteBuffer = theData.slice(thePointer, thePointer + reportedDataLength);
-	theItem.qualityBuffer.fill(0xC0);  // Fill with 0xC0 (192) which means GOOD QUALITY in the OPC world.
+    // Заповнити 0xC0 (192), що означає ДОБРЕ ЯКІСТЬ у світі OPC. 
+	theItem.qualityBuffer.fill(0xC0);  
 
 	thePointer += theItem.byteLength; //WithFill;
-
-	if (((thePointer - prePointer) % 2)) { // Odd number.  With the S7 protocol we only request an even number of bytes.  So there will be a filler byte.
+    //Непарне число. З протоколом S7 ми запитуємо лише парну кількість байтів. 
+    // Отже, буде байт-заповнювач.
+	if (((thePointer - prePointer) % 2)) { 
 		thePointer += 1;
 	}
-
-	//	outputLog("We have an item value of " + theItem.value + " for " + theItem.addr + " and pointer of " + thePointer);
 
 	return thePointer;
 }
 ```
-
-
-
-
 
 [<-- До опису бібліотеки](README.md) 
 

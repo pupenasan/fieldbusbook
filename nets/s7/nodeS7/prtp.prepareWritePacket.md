@@ -1,6 +1,17 @@
 [<-- До опису бібліотеки](README.md) 
 
-## prepareWritePacket
+# prepareWritePacket
+
+ToDo
+
+Бере список блоків `instantWriteBlockList` та робить з нього `writePacketArray`. 
+
+- `itemList = instantWriteBlockList`
+- Створює `globalWriteBlockList` 
+- `globalWriteBlockList[0] = itemList[0]`
+- з одним 0-м елементом
+
+
 
 ```js
 NodeS7.prototype.prepareWritePacket = function() {
@@ -21,12 +32,13 @@ NodeS7.prototype.prepareWritePacket = function() {
 	// Reinitialize the WriteBlockList
 	self.globalWriteBlockList = [];
 
-	// At this time we do not do write optimizations.
-	// The reason for this is it is would cause numerous issues depending how the code was written in the PLC.
-	// If we write M0.1 and M0.2 then to optimize we would have to write MB0, which also writes 0.0, 0.3, 0.4...
-	//
-	// I suppose when working with integers, if we write MW0 and MW2, we could write these as one block.
-	// But if you really, really want the program to do that, write an array yourself.
+	// На цей раз ми не робимо оптимізацію. 
+    // Причина в цьому те що може спричинити 
+	// Наприклад якщо ми записуєм M0.1 і M0.2 то оптимізація б спричниа запис MB0, 
+    // який би також записував 0.0, 0.3, 0.4...
+	// Так само зі змінними MW0 і MW2, записався б весь блок
+	// Але якщо ви дуже, дуже хочете програму для того щоб це зробити, 
+    // запишіть самі масив 
 	self.globalWriteBlockList[0] = itemList[0];
 	self.globalWriteBlockList[0].itemReference = [];
 	self.globalWriteBlockList[0].itemReference.push(itemList[0]);
@@ -129,14 +141,8 @@ NodeS7.prototype.prepareWritePacket = function() {
 			requestNumber++;
 			numItems++;
 			packetWriteLength += (requestList[i].byteLengthWithFill + 12 + 4); // Don't forget each request has a 12 byte header as well.
-			//outputLog('I is ' + i + ' Addr Type is ' + requestList[i].addrtype + ' and type is ' + requestList[i].datatype + ' and DBNO is ' + requestList[i].dbNumber + ' and offset is ' + requestList[i].offset + ' bit ' + requestList[i].bitOffset + ' len ' + requestList[i].arrayLength);
-			//S7AddrToBuffer(requestList[i]).copy(self.writeReq, 19 + numItems * 12);  // i or numItems?  used to be i.
-			//itemBuffer = bufferizeS7Packet(requestList[i]);
-			//itemBuffer.copy(dataBuffer, dataBufferPointer);
-			//dataBufferPointer += itemBuffer.length;
 			self.writePacketArray[thisPacketNumber].itemList.push(requestList[i]);
 		}
-		//		dataBuffer.copy(self.writeReq, 19 + (numItems + 1) * 12, 0, dataBufferPointer - 1);
 	}
 }
 ```

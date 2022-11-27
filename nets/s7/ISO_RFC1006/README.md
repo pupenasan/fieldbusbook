@@ -1,10 +1,12 @@
+[S7 TCP/IP](../README.md)
+
 # RFC 1006
 
 - [ISO 8073](ISO 8073.md)
 
 - [RFC1006](RFC1006.md)
 
-RFC1006 - по факту протокол шлюзування ISO8072/ISO8073 на TCP.
+RFC1006 - це протокол шлюзування ISO8072/ISO8073 на TCP.
 
 Стандарт ISO 8072 описує визначення транспортної послуги ISO, яка надалі називається TP.
 
@@ -328,12 +330,12 @@ negotiatePDU = Buffer.from([
     // S7 param
     0xf0, //17(10) - PDU length negotiation 
     0x00, //18(11) - 
-    0x00, //19(12) - 
+    0x00, //19(12) - //requestMaxParallel ?
     0x08, //20(13) - //у libnodave=1? 
-    0x00, //21(14) -
+    0x00, //21(14) - //requestMaxParallel ?
     0x08, //22(15) - //у libnodave=1?
-    0x03, //23(16) maxPDUlength - завжди 3 
-    0xc0  //24(17) maxPDUlength - завжди c0  
+    0x03, //23(16) maxPDUlength - завжди 3 //requestMaxPDU?
+    0xc0  //24(17) maxPDUlength - завжди c0 //requestMaxPDU? 
 ]);
 ```
 

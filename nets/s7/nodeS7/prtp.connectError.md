@@ -2,13 +2,13 @@
 
 ## connectError
 
-Обробник підключення по TCP
+Обробник помилки підключення по TCP
 
 ```js
 NodeS7.prototype.connectError = function(e) {
 	var self = this;
-	// Note that a TCP connection timeout error will appear here.  
-    // An ISO connection timeout error is a packet timeout.
+	// Зауважте, що тут з’явиться помилка тайм-ауту з’єднання TCP.  
+    // Помилка тайм-ауту підключення ISO – це тайм-аут пакета (packet timeout).
 	outputLog('We Caught a connect error ' + e.code, 0, self.connectionID);
 	if ((!self.connectCBIssued) && (typeof (self.connectCallback) === "function")) {
 		self.connectCBIssued = true;

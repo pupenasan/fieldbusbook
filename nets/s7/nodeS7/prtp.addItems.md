@@ -1,6 +1,18 @@
 [<-- До опису бібліотеки](README.md) 
 
-## add, remove Item
+# addItems
+
+```js
+addItems (arg) 
+```
+
+Добавляє в масив `addRemoveArray` елемент `arg`, приклад
+
+```js
+conn.addItems(['TEST1', 'TEST4']);
+```
+
+
 
 ```js
 NodeS7.prototype.addItems = function(arg) {

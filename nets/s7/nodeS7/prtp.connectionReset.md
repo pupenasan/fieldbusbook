@@ -1,6 +1,8 @@
 [<-- До опису бібліотеки](README.md) 
 
-## connectionReset
+# connectionReset
+
+Обнуляє стан з'єднання (`isoConnectionState=0`) і якщо немає ніяких запитів запускається таймер на 3.5 с після чого запускається  функція `resetNow`
 
 ```js
 NodeS7.prototype.connectionReset = function() {

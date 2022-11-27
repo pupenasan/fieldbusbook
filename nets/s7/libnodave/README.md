@@ -1,5 +1,7 @@
 https://sourceforge.net/projects/libnodave/
 
+https://github.com/netdata-be/libnodave
+
 # The beginnings of a documentation for **LIBNODAVE**
 
 ## Purpose

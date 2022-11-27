@@ -1,6 +1,31 @@
 [<-- До опису бібліотеки](README.md) 
 
-## writeItems
+# writeItems
+
+Формує масив `instantWriteBlockList` з елементів типу `S7Item` що записуються та їх значень після чого викликає `prepareWritePacket` для ...  та `sendWritePacket` для.
+
+```js
+writeItems (arg, value, cb)
+```
+
+`arg` - назва змінної, або масив назв для запису 
+
+`value` - значення для запису, або масив значень для запису
+
+`cb` - функція зворотного виклику для виклику після запису
+
+```js
+conn.writeItems('TEST3', true, valuesWritten);
+conn.writeItems(['TEST5', 'TEST6'], [ 867.5309, 9 ], valuesWritten); 
+conn.writeItems('TEST7', [666, 777], valuesWritten); 
+```
+
+Функція робить наступне:
+
+- перевіряє чи відбувається записування через функцію [isWriting()](prtp.isWriting.md) та `writeInQueue`, якщо так, то виходить
+- Ставить у якості `writeDoneCallback` функцію `cb`
+- Добавляє в масив `instantWriteBlockList` елементи через [stringToS7Addr](stringToS7Addr.md) відповідно до вхідних аргументів
+- Викликає [prepareWritePacket](prtp.prepareWritePacket.md)
 
 ```js
 NodeS7.prototype.writeItems = function(arg, value, cb) {
@@ -45,7 +70,7 @@ NodeS7.prototype.writeItems = function(arg, value, cb) {
 		}
 	}
 
-	// Validity check.
+	// Перевірка валідності.
 	for (i = self.instantWriteBlockList.length - 1; i >= 0; i--) {
 		if (self.instantWriteBlockList[i] === undefined) {
 			self.instantWriteBlockList.splice(i, 1);

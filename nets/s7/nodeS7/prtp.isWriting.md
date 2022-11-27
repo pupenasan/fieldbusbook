@@ -1,5 +1,9 @@
 [<-- До опису бібліотеки](README.md) 
 
+# isWriting
+
+Показує чи бібліотека в процесі запису даних. Для цього перебирає усі елементи у `writePacketArray` і якщо якийсь має властивість `sent === true` повертає `true`
+
 ```js
 NodeS7.prototype.isWriting = function() {
 	var self = this, i;
@@ -10,10 +14,6 @@ NodeS7.prototype.isWriting = function() {
 	return false;
 }
 ```
-
-
-
-
 
 [<-- До опису бібліотеки](README.md) 
 
